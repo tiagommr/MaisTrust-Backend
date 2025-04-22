@@ -17,13 +17,29 @@ public class AuthController {
     private UserRepository userRepository;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        Optional<User> user = userRepository.findByEmail(loginRequest.getEmail());
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        System.out.println("Email recebido: " + request.getEmail());
+        System.out.println("Password recebida: " + request.getPassword());
 
-        if (user.isPresent() && user.get().getPassword().equals(loginRequest.getPassword())) {
-            return ResponseEntity.ok(user.get());
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            System.out.println("Utilizador encontrado na BD: " + user.getEmail());
+            System.out.println("Password na BD: " + user.getPassword());
+
+            if (user.getPassword().equals(request.getPassword())) {
+                System.out.println("Password correta!");
+                user.setPassword(null);
+                return ResponseEntity.ok(user);
+            } else {
+                System.out.println("Password incorreta.");
+            }
+        } else {
+            System.out.println("Utilizador não encontrado.");
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
     }
+
 }

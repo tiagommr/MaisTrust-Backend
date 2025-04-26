@@ -16,8 +16,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
-
     private String nome;
 
     @Column(unique = true)
@@ -25,10 +23,12 @@ public class User {
 
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
     private String clube;
+
+    private String telefone;
+    private String tipoUtilizador;
+    private Long idClube;
+    private Long idFederacao;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

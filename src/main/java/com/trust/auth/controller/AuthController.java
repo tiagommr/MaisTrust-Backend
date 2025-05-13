@@ -2,15 +2,17 @@ package com.trust.auth.controller;
 
 import com.trust.auth.dto.LoginRequest;
 import com.trust.auth.dto.RegisterRequest;
-import com.trust.auth.model.Role;
 import com.trust.auth.model.User;
+import com.trust.auth.security.JwtService;  // Importando o JwtService para geração de token
 import com.trust.auth.repository.UserRepository;
+import com.trust.auth.security.LoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*")
@@ -23,6 +25,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;  // Adicionando o serviço JwtService para gerar o token
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
@@ -70,13 +75,21 @@ public class AuthController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                user.setPassword(null);
-                return ResponseEntity.ok(user);
+                // Gera o token JWT
+                String token = jwtService.generateToken(user.getId());
+
+                System.out.println("Token gerado: " + token);  // Adicionando log para ver o token gerado
+
+                // Cria um objeto de resposta com os dados do usuário e o token
+                user.setPassword(null); // Não retornar a senha
+                return ResponseEntity.ok(new LoginResponse(user, token)); // Envia o usuário e token na resposta
             }
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
     }
+
+
 
     private boolean isPasswordValid(String password) {
         return password.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d])[A-Za-z\\d\\S]{8,}$");

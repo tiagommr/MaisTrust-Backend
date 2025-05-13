@@ -9,11 +9,12 @@ public interface participacaoSinistroRepositorio extends JpaRepository<participa
 
     Optional<participacaoSinistro> findById(Long id);
 
-    participacaoSinistro findByIdAtletaAndIdClubeAndIdFederacaoAndEstadoAndValidador(
-            Long idAtleta, Long idClube, Long idFederacao, String estado, Long validador
+    participacaoSinistro findByAtletaIdAndClubeIdAndFederacaoIdAndEstadoAndValidadorId(
+            Long atletaId, Long clubeId, Long federacaoId, String estado, Long validadorId
     );
 
-    participacaoSinistro findByIdAtletaAndIdClubeAndIdFederacaoAndEstado(
-            Long idAtleta, Long idClube, Long idFederacao, String estado
+    participacaoSinistro findByAtletaIdAndClubeIdAndFederacaoIdAndEstado(
+            Long atletaId, Long clubeId, Long federacaoId, String estado
     );
 }
+

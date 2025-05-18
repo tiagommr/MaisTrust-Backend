@@ -34,9 +34,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register").permitAll() // Libera login e registo
-                        .anyRequest().authenticated() // Tudo o resto precisa de token
+                        .requestMatchers(
+                                "/auth/login",
+                                "/auth/register",
+                                "/auth/**",
+                                "/reset_password.html",       // ✅ permite o acesso direto ao HTML
+                                "/static/reset_password.html" // (extra segurança)
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

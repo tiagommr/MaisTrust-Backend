@@ -30,6 +30,11 @@ public class User {
     private Long idClube;
     private Long idFederacao;
 
+    @Builder.Default
+    @Column(name = "is_verified")
+    private boolean isVerified = false;
+
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

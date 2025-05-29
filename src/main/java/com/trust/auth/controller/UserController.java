@@ -2,6 +2,8 @@ package com.trust.auth.controller;
 
 import com.trust.auth.dto.UserResponse;
 import com.trust.auth.model.User;
+import com.trust.auth.model.atleta;
+import com.trust.auth.repository.AtletaRepositorio;
 import com.trust.auth.repository.UserRepository;
 import com.trust.auth.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.HashMap;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -27,29 +32,43 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Autowired
+    private AtletaRepositorio atletaRepositorio;
+
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
         String token = jwtService.getJwtFromRequest(request);
-        System.out.println("🔐 Token recebido: " + token);
-
         if (token != null && jwtService.isTokenValid(token)) {
             Long userId = jwtService.getUserIdFromToken(token);
-            System.out.println("👤 UserID extraído: " + userId);
             User user = userRepository.findById(userId).orElse(null);
+
             if (user != null) {
-                System.out.println("📤 Nome: " + user.getNome());
-                UserResponse response = new UserResponse(
-                        user.getId(),
-                        user.getNome(),
-                        user.getEmail(),
-                        user.getTipoUtilizador(),
-                        user.getTelefone() // Adiciona este campo ao UserResponse
-                );
+                HashMap<Object, Object> response = new HashMap<>();
+                response.put("id", user.getId());
+                response.put("nome", user.getNome());
+                response.put("email", user.getEmail());
+                response.put("tipoUtilizador", user.getTipoUtilizador());
+                response.put("telefone", user.getTelefone());
+
+                // Procurar o atleta associado
+                Optional<atleta> atletaOpt = atletaRepositorio.findByUser(user);
+                if (atletaOpt.isPresent()) {
+                    atleta a = atletaOpt.get();
+                    if (a.getClube() != null) {
+                        response.put("clube", a.getClube().getNome());
+                    }
+                    if (a.getFederacao() != null) {
+                        response.put("federacao", a.getFederacao().getNome());
+                    }
+                }
+
                 return ResponseEntity.ok(response);
             }
         }
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {

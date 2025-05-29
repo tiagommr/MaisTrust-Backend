@@ -39,7 +39,10 @@ public class SecurityConfig {
                                 "/auth/register",
                                 "/auth/**",
                                 "/reset_password.html",       // ✅ permite o acesso direto ao HTML
-                                "/static/reset_password.html" // (extra segurança)
+                                "/static/reset_password.html",// (extra segurança)
+                                "/clube/por-federacao/**",   // ← permite todos IDs
+                                "/federacoes",// ← PERMITE este endpoint
+                                "/clube/todos"// ← PERMITE este endpoint
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

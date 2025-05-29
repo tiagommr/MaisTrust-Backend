@@ -51,4 +51,15 @@ public class atleta {
 
     @Column(name = "data_inicio_cobertura")
     private LocalDate dataInicioCobertura;
+
+    @ManyToOne
+    @JoinColumn(name = "id_clube")
+    private clube clube;
+
+    @ManyToOne
+    @JoinColumn(name = "id_federacao")
+    private federacao federacao;
+
+
 }
+

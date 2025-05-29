@@ -2,7 +2,10 @@ package com.trust.auth.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Entity
 @Table(name = "users")
@@ -40,4 +43,8 @@ public class User {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return java.util.List.of();
+    }
 }

@@ -2,10 +2,12 @@ package com.trust.auth.controller;
 
 import com.trust.auth.model.User;
 import com.trust.auth.model.atleta;
+import com.trust.auth.model.profissao;
 import com.trust.auth.model.clube;
 import com.trust.auth.model.federacao;
 import com.trust.auth.dto.AtletaRequest;
 import com.trust.auth.repository.AtletaRepositorio;
+import com.trust.auth.repository.profissaoRepositorio;
 import com.trust.auth.repository.clubeRepositorio;
 import com.trust.auth.repository.federacaoRepositorio;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @RestController
@@ -25,11 +25,14 @@ public class AtletaControlador {
     private final AtletaRepositorio atletaRepositorio;
     private final clubeRepositorio clubeRepositorio;
     private final federacaoRepositorio federacaoRepositorio;
+    private final profissaoRepositorio profissaoRepositorio;
 
-    public AtletaControlador(AtletaRepositorio atletaRepositorio, clubeRepositorio clubeRepositorio, federacaoRepositorio federacaoRepositorio) {
+    public AtletaControlador(AtletaRepositorio atletaRepositorio, clubeRepositorio clubeRepositorio,
+                             federacaoRepositorio federacaoRepositorio, profissaoRepositorio profissaoRepositorio) {
         this.atletaRepositorio = atletaRepositorio;
         this.clubeRepositorio = clubeRepositorio;
         this.federacaoRepositorio = federacaoRepositorio;
+        this.profissaoRepositorio = profissaoRepositorio;
     }
 
     @GetMapping
@@ -47,7 +50,6 @@ public class AtletaControlador {
 
         boolean incompleto = Stream.of(
                 a.getDataNascimento(),
-                a.getEstadoCivil(),
                 a.getProfissao(),
                 a.getTelefone(),
                 a.getMorada(),
@@ -77,7 +79,6 @@ public class AtletaControlador {
         atleta novo = atleta.builder()
                 .user(user)
                 .dataNascimento(request.getDataNascimento())
-                .estadoCivil(request.getEstadoCivil())
                 .profissao(request.getProfissao())
                 .telefone(request.getTelefone())
                 .morada(request.getMorada())
@@ -96,5 +97,51 @@ public class AtletaControlador {
 
         atletaRepositorio.save(novo);
         return ResponseEntity.ok("✅ Dados gravados com sucesso");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getDadosAtleta(@AuthenticationPrincipal User userAutenticado) {
+        Optional<atleta> optionalAtleta = atletaRepositorio.findByUser(userAutenticado);
+
+        if (optionalAtleta.isEmpty()) {
+            return ResponseEntity.badRequest().body("Atleta não encontrado");
+        }
+
+        atleta atletaEncontrado = optionalAtleta.get();
+
+        Map<String, Object> resposta = new HashMap<>();
+
+        // Dados do User
+        resposta.put("nome", userAutenticado.getNome());
+        resposta.put("email", userAutenticado.getEmail());
+
+        // Dados do Atleta
+        resposta.put("dataNascimento", atletaEncontrado.getDataNascimento());
+        resposta.put("telefone", atletaEncontrado.getTelefone());
+        resposta.put("morada", atletaEncontrado.getMorada());
+        resposta.put("codigoPostal", atletaEncontrado.getCodigoPostal());
+        resposta.put("localidade", atletaEncontrado.getLocalidade());
+        resposta.put("nif", atletaEncontrado.getNif());
+        resposta.put("nomeResponsavel", atletaEncontrado.getNomeResponsavel());
+        resposta.put("relacaoResponsavel", atletaEncontrado.getRelacaoResponsavel());
+
+        // Dados da Profissão
+        resposta.put("profissao", atletaEncontrado.getProfissao());
+
+        return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/profissoes")
+    public ResponseEntity<List<Map<String, Object>>> listarProfissoes() {
+        List<profissao> profissoes = profissaoRepositorio.findAll();
+
+        List<Map<String, Object>> resultado = profissoes.stream().map(p -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", p.getId());
+            map.put("nome", p.getNome());
+            return map;
+        }).toList();
+
+        return ResponseEntity.ok(resultado);
     }
 }

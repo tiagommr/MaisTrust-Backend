@@ -24,10 +24,6 @@ public class atleta {
     @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
 
-    @Column(name = "estado_civil")
-    private String estadoCivil;
-
-    private String profissao;
     private String telefone;
     private String morada;
 
@@ -59,6 +55,10 @@ public class atleta {
     @ManyToOne
     @JoinColumn(name = "id_federacao")
     private federacao federacao;
+
+    private String profissao;
+
+
 
 
 }

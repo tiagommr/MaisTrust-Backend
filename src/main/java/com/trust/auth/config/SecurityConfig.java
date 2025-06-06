@@ -38,14 +38,16 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/auth/register",
                                 "/auth/**",
-                                "/reset_password.html",       // ✅ permite o acesso direto ao HTML
-                                "/static/reset_password.html",// (extra segurança)
-                                "/clube/por-federacao/**",   // ← permite todos IDs
-                                "/federacoes",// ← PERMITE este endpoint
-                                "/clube/todos"// ← PERMITE este endpoint
+                                "/reset_password.html",
+                                "/static/reset_password.html",
+                                "/clube/por-federacao/**",
+                                "/federacoes",
+                                "/clube/todos"
                         ).permitAll()
+                        .requestMatchers("/atletas/me").authenticated() // ✅ AQUI
                         .anyRequest().authenticated()
                 )
+
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

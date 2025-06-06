@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/auth")
@@ -45,6 +46,9 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        System.out.println("🚀 Tentativa de registo recebida:");
+        System.out.println("JSON recebido: " + request);
+
         System.out.println("🚀 Tentativa de registo recebida:");
         System.out.println("Nome: " + request.getNome());
         System.out.println("Email: " + request.getEmail());

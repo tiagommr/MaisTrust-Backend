@@ -25,4 +25,5 @@ public class AtletaRequest {
     private String escalao;
     private String categoria;
     private LocalDate dataInicioCobertura;
+
 }

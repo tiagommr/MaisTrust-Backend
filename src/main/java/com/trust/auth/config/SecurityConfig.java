@@ -26,11 +26,10 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-    // 🔐 Filtro global de segurança
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> {}) // Ativa CORS com configuração separada
+                .cors(cors -> {}) // Habilita CORS
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -39,39 +38,39 @@ public class SecurityConfig {
                                 "/auth/register",
                                 "/auth/**",
                                 "/reset_password.html",
+                                "/confirm_success.html",
+                                "/confirm_failed.html",
                                 "/static/reset_password.html",
-                                "/clube/por-federacao/**",
                                 "/federacoes",
+                                "/clube/por-federacao/**",
                                 "/clube/todos"
                         ).permitAll()
-                        .requestMatchers("/atletas/me").authenticated() // ✅ AQUI
+                        .requestMatchers(
+                                "/clube/nome/**",   // ✅ Protege rota que busca nome do clube pelo user
+                                "/atletas/me"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
-
-
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // 🔒 Encoder de password (BCrypt)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // 🔑 Para usar AuthenticationManager se necessário (regra Spring Boot 3)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // 🌍 CORS config: permite qualquer origem, cabeçalho e método
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(List.of("*")); // usa pattern em vez de "*" direto
+        config.setAllowedOriginPatterns(List.of("*")); // Suporta qualquer origem
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 

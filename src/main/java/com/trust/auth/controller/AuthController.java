@@ -14,6 +14,7 @@ import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -102,25 +103,27 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<?> verificarConta(@RequestParam("token") String token) {
+    public ResponseEntity<Void> verificarConta(@RequestParam("token") String token) {
         Optional<VerificationToken> optionalToken = tokenRepository.findByToken(token);
 
-        if (optionalToken.isEmpty()) {
-            return ResponseEntity.badRequest().body("Token inválido.");
+        if (optionalToken.isEmpty() || optionalToken.get().getExpiryDate().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.FOUND)  // 302
+                    .location(URI.create("/confirm_failed.html"))
+                    .build();
         }
 
         VerificationToken vt = optionalToken.get();
-        if (vt.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.status(HttpStatus.GONE).body("Token expirado.");
-        }
-
         User user = vt.getUser();
         user.setVerified(true);
         userRepository.save(user);
         tokenRepository.delete(vt);
 
-        return ResponseEntity.ok("Conta verificada com sucesso!");
+        return ResponseEntity.status(HttpStatus.FOUND)  // 302
+                .location(URI.create("/confirm_success.html"))
+                .build();
     }
+
+
 
 
     @PostMapping("/login")

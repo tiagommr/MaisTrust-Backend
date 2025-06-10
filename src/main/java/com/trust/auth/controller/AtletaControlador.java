@@ -111,11 +111,8 @@ public class AtletaControlador {
 
         Map<String, Object> resposta = new HashMap<>();
 
-        // Dados do User
         resposta.put("nome", userAutenticado.getNome());
         resposta.put("email", userAutenticado.getEmail());
-
-        // Dados do Atleta
         resposta.put("dataNascimento", atletaEncontrado.getDataNascimento());
         resposta.put("telefone", atletaEncontrado.getTelefone());
         resposta.put("morada", atletaEncontrado.getMorada());
@@ -124,11 +121,31 @@ public class AtletaControlador {
         resposta.put("nif", atletaEncontrado.getNif());
         resposta.put("nomeResponsavel", atletaEncontrado.getNomeResponsavel());
         resposta.put("relacaoResponsavel", atletaEncontrado.getRelacaoResponsavel());
-
-        // Dados da Profissão
         resposta.put("profissao", atletaEncontrado.getProfissao());
 
         return ResponseEntity.ok(resposta);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<?> atualizarDadosAtleta(@RequestBody Map<String, Object> atualizados, @AuthenticationPrincipal User user) {
+        Optional<atleta> optionalAtleta = atletaRepositorio.findByUser(user);
+
+        if (optionalAtleta.isEmpty()) {
+            return ResponseEntity.badRequest().body("Atleta não encontrado");
+        }
+
+        atleta a = optionalAtleta.get();
+
+        a.setTelefone((String) atualizados.get("telefone"));
+        a.setMorada((String) atualizados.get("morada"));
+        a.setProfissao((String) atualizados.get("profissao"));
+        a.setNif((String) atualizados.get("nif"));
+        a.setNomeResponsavel((String) atualizados.get("nomeResponsavel"));
+        a.setRelacaoResponsavel((String) atualizados.get("relacaoResponsavel"));
+
+        atletaRepositorio.save(a);
+
+        return ResponseEntity.ok("✅ Dados atualizados com sucesso");
     }
 
     @GetMapping("/profissoes")

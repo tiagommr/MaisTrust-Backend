@@ -17,6 +17,10 @@ public class federacaoControlador {
 
     @GetMapping
     public List<federacao> listarTodas() {
-        return federacaoRepositorio.findAll();
+        return federacaoRepositorio.findAll().stream()
+                .sorted((a, b) -> a.getNome().compareToIgnoreCase(b.getNome()))
+                .peek(f -> f.setNome(f.getNome().toUpperCase()))
+                .toList();
     }
+
 }
